@@ -1,0 +1,67 @@
+%{
+#include <stdio.h>
+int positionString = 0;
+int lineNumber = 1;
+%}
+digit 		[0-9]
+number 		[0-9]+
+letter 		[A-Za-z]
+tab 		((\ )|(\t)|(\n))+
+create 		[Cc][Rr][Ee][Aa][Tt][Ee]
+global 		[Gg][Ll][Oo][Bb][Aa][Ll]
+local 		[Ll][Oo][Cc][Aa][Ll]
+temporary 	[Tt][Ee][Mm][Pp][Oo][Rr][Aa][Rr][Yy]
+table 		[Tt][Aa][Bb][Ll][Ee]
+on 			[Oo][Nn]
+commit 		[Cc][Oo][Mm][Mm][Ii][Tt]
+delete 		[Dd][Ee][Ll][Ee][Tt][Ee]
+preserve 	[Pp][Rr][Ee][Ss][Ee][Rr][Vv][Ee]
+rows 		[Rr][Oo][Ww][Ss]
+cascade 	[Cc][Aa][Ss][Cc][Aa][Dd][Ee]
+set 		[Ss][Ee][Tt]
+null 		[Nn][Uu][Ll][Ll]
+default 	[Dd][Ee][Ff][Aa][Uu][Ll][Tt]
+no 			[Nn][Oo]
+action 		[Aa][Cc][Tt][Ii][Oo][Nn]
+char 		[Cc][Hh][Aa][Rr]
+varchar 	[Vv][Aa][Rr][Cc][Hh][Aa][Rr]
+integer 	[Ii][Nn][Tt][Ee][Gg][Ee][Rr]
+float 		[Ff][Ll][Oo][Aa][Tt]
+real 		[Rr][Ee][Aa][Ll]
+numeric 	[Nn][Uu][Mm][Ee][Rr][Ii][Cc]
+date 		[Dd][Aa][Tt][Ee]
+time 		[Tt][Ii][Mm][Ee]
+not 		[Nn][Oo][Tt]
+unique 		[Uu][Nn][Ii][Qq][Uu][Ee]
+primary 	[Pp][Rr][Ii][Mm][Aa][Rr][Yy]
+key 		[Kk][Ee][Yy]
+foreign 	[Ff][Oo][Rr][Ee][Ii][Gg][Nn]
+references 	[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]
+update 		[Uu][Pp][Dd][Aa][Tt][Ee]
+%%
+{create}{tab}((({global})|({local})){tab}{temporary}{tab})?{table} 						{positionString += yyleng; printf("%s","CREATE_TABLE ");}
+{on}{tab}{commit}{tab}(({delete})|({preserve})){tab}{rows} 								{positionString += yyleng; printf("%s","COMMIT ");}
+({cascade})|({set}{tab}{null})|({set}{tab}{default})|({no}{tab}{action}) 				{positionString += yyleng; printf("%s","TRIGGER_ACTION ");}
+({char})(\({number}\))?|({varchar})(\({number}\))? 										{positionString += yyleng; printf("%s","STRING ");}
+({integer})|(({float})(\({number}\))?)|({real})|(({numeric})(\({number}(,{number})?\))?) {positionString += yyleng; printf("%s","NUMERIC ");}
+({date})|(({time})(\({number}\))?) 														{positionString += yyleng; printf("%s","DATE ");}
+({not}{tab}{null})|({unique})|({primary}{tab}{key}) 									{positionString += yyleng; printf("%s","LIMITATION ");}
+{unique} 																				{positionString += yyleng; printf("%s","UNIQUE ");}
+{primary}		    																	{positionString += yyleng; printf("%s","PRIMARY ");}
+{key}																					{positionString += yyleng; printf("%s","KEY ");}
+{foreign} 																				{positionString += yyleng; printf("%s","FOREIGN ");}
+{references}																			{positionString += yyleng; printf("%s","REFERENCES ");}
+{on} 																					{positionString += yyleng; printf("%s","ON ");}
+{update} 																				{positionString += yyleng; printf("%s","UPDATE ");}
+{delete} 																				{positionString += yyleng; printf("%s","DELETE ");}
+{digit}+																				{positionString += yyleng; printf("%s","NUMBER ");}
+[A-Za-z]([A-Za-z]|{digit})* 															{positionString += yyleng; printf("%s","IDENTIFY ");}
+{null} 																					{positionString += yyleng; printf("%s","NULL ");}
+\(																						{positionString += yyleng; printf("LB "); }
+\)																						{positionString += yyleng; printf("RB "); }
+[\t]+         																			;
+\ 																						{positionString += yyleng;}
+(\,)|(\;)																				{positionString += yyleng; printf("PUNCTUATION ");}
+\n																						{positionString = 0; lineNumber += 1; printf("\n");}
+.																						{printf("\n ERROR:\n positionX = %i \n positionY = %i \n", positionString, lineNumber);positionString += yyleng;}
+%%

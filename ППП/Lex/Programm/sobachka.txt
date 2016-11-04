@@ -1,0 +1,4 @@
+CREATE  Global temporary table nameTable
+( 
+First INteger primary key ,
+Second varchar(50) not null #@,

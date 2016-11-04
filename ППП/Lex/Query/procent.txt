@@ -1,0 +1,11 @@
+CREATE Global temporary table nameTable
+( 
+First INteger primary key % ,
+Second varchar(50) not null ,
+Third char unique ,
+Fouth numeric(10) ,
+Fifth real ,
+Sixth date ,
+FOreign key (First, Second, Third)
+on commit delete rows
+);
